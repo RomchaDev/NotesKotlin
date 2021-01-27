@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">NotesKotlin</string>
+    <string name="enter_your_note_here">Enter your note here</string>
+</resources>
