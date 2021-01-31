@@ -1,9 +1,12 @@
 package org.romeo.noteskotlin.main
 
+import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import org.romeo.noteskotlin.ACTIVITY_TO_START
+import org.romeo.noteskotlin.NOTE_KEY
 import org.romeo.noteskotlin.create_edit_note.CreateEditActivity
 import org.romeo.noteskotlin.model.Note
 import org.romeo.noteskotlin.model.Repository
@@ -16,8 +19,8 @@ class MainViewModel : ViewModel(), NotesAdapter.NoteClickListener {
     }
 
     private val notesListLiveDataUi: MutableLiveData<MutableList<Note>> = MutableLiveData()
-    private val startActivityLiveDataUi: MutableLiveData<KClass<CreateEditActivity>> =
-        MutableLiveData() //TODO: Use generics to be able to start any activity
+    private val startActivityLiveDataUi: MutableLiveData<Intent> =
+        MutableLiveData()
 
     init {
         Repository.getNotesListLiveData().observeForever { notes ->
@@ -29,19 +32,36 @@ class MainViewModel : ViewModel(), NotesAdapter.NoteClickListener {
         return notesListLiveDataUi
     }
 
-    fun getStartActivityLiveData(): LiveData<KClass<CreateEditActivity>> {
+    fun getStartActivityLiveData(): LiveData<Intent> {
         return startActivityLiveDataUi
     }
 
+    /**
+     * It is called from xml when user pressed
+     * on the create FAB
+     * */
     fun onCreateNotePressed() {
-        startActivityLiveDataUi.value = CreateEditActivity::class
+        val intent = Intent()
+        intent.putExtra(ACTIVITY_TO_START, CreateEditActivity::class.java)
+        startActivityLiveDataUi.value = intent
     }
 
+    /**
+     * It is called when user long clicked to
+     * the notes RecyclerView's item
+     * */
     override fun onLongClick(note: Note): Boolean {
-        return Repository.removeNote(note.hashCode()) == Result.SUCCESS
+        return Repository.removeNote(note.id) == Result.SUCCESS
     }
 
+    /**
+     * It is called when user clicked to
+     * the notes RecyclerView's item
+     * */
     override fun onClick(note: Note) {
-        Log.d(TAG, "onClick: onClick")
+        val intent = Intent()
+        intent.putExtra(ACTIVITY_TO_START, CreateEditActivity::class.java)
+        intent.putExtra(NOTE_KEY, note)
+        startActivityLiveDataUi.value = intent
     }
 }

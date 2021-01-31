@@ -4,44 +4,48 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 
 object Repository {
-    private val notes: MutableList<Note> = mutableListOf()
+    private var nextNoteId = 0L
+    private val dataProvider: FirebaseDataProviderTemplate = FirebaseDataProvider()
     private val notesListLiveData: MutableLiveData<MutableList<Note>> = MutableLiveData()
+
+    var notes: MutableList<Note> = mutableListOf()
+        set(value) {
+            field = value
+            notesListLiveData.value = notes
+        }
 
     init {
         notesListLiveData.value = notes
+        dataProvider.subscribeNotesListChanged(this)
     }
 
     fun getNotesListLiveData(): LiveData<MutableList<Note>> {
         return notesListLiveData
     }
 
-    fun replaceNote(oldHash: Int, newNote: Note): Result {
-        for (i in 0..notes.size) {
-            if (notes[i].hashCode() == oldHash) {
-                notes[i] = newNote
-                return Result.SUCCESS
+    fun editNote(noteId: Long?, newNote: Note?): Result {
+        if (newNote == null || noteId == null)
+            return Result.SAVE_ERROR
+
+        for (note in notes) {
+            if (note.id == noteId) {
+                return dataProvider.editNoteById(newNote.id, newNote)
             }
         }
 
         return Result.SAVE_ERROR
     }
 
-    fun addNewNote(note: Note): Result {
-        return try {
-            notes.add(note)
-            notesListLiveData.value = notes
-            Result.SUCCESS
-        } catch (e: Exception) {
-            Result.SAVE_ERROR
-        }
+    fun saveNote(note: Note): Result {
+        note.id = nextNoteId++
+
+        return dataProvider.saveNote(note)
     }
 
-    fun removeNote(hash: Int): Result {
-        for (i in 0..notes.size) {
-            if (notes[i].hashCode() == hash) {
-                notes.removeAt(i)
-                notesListLiveData.value = notes
-                return Result.SUCCESS
+    fun removeNote(noteId: Long): Result {
+        for (note in notes) {
+            if (note.id == noteId) {
+                return dataProvider.removeNoteById(note.id)
             }
         }
 

@@ -5,8 +5,11 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
+import org.romeo.noteskotlin.ACTIVITY_TO_START
+import org.romeo.noteskotlin.NOTE_KEY
 import org.romeo.noteskotlin.create_edit_note.CreateEditActivity
 import org.romeo.noteskotlin.databinding.ActivityMainBinding
+import kotlin.reflect.KClass
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,8 +28,15 @@ class MainActivity : AppCompatActivity() {
 
         binding.viewModel = viewModel
 
-        viewModel.getStartActivityLiveData().observe(this) {
-            startActivity(Intent(this, it.java))
+        viewModel.getStartActivityLiveData().observe(this) { inIntent ->
+            val classJava = inIntent.getSerializableExtra(ACTIVITY_TO_START) as Class<*>
+
+            val startIntent = Intent(this, classJava)
+
+            startIntent.putExtra(NOTE_KEY, inIntent.getSerializableExtra(NOTE_KEY))
+
+            startActivity(startIntent)
+
         }
     }
 

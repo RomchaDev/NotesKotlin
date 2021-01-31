@@ -1,21 +1,29 @@
 package org.romeo.noteskotlin.model
 
-import android.os.Parcelable
+import org.romeo.noteskotlin.DEFAULT_NOTE_ID_VALUE
 import java.io.Serializable
 
-/**
- * This class may probably be used
- * in different collections. It can
- * be useful to be able to compare
- * notes. That's why it is a data class.
- * */
-
-
 data class Note(
+    var id: Long = DEFAULT_NOTE_ID_VALUE,
     var title: String = "",
     var content: String = ""
 ) : Serializable {
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Note
+
+        if (id != other.id) return false
+
+        return true
+    }
+
     override fun hashCode(): Int {
-        return super.hashCode()
+        var result = id.hashCode()
+        result = 31 * result + title.hashCode()
+        result = 31 * result + content.hashCode()
+        return result
     }
 }

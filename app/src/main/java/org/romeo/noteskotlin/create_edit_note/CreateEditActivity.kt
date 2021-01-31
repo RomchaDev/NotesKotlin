@@ -8,8 +8,13 @@ import androidx.lifecycle.ViewModelProvider
 import org.romeo.noteskotlin.databinding.ActivityNoteBinding
 
 class CreateEditActivity : AppCompatActivity() {
-    private val viewModel = ViewModelProvider
-        .NewInstanceFactory().create(CreateEditViewModel::class.java)
+    private val viewModel by lazy {
+        ViewModelProvider(this, CreateEditViewModelFactory(intent)).
+                get(CreateEditViewModel::class.java)
+    }
+
+    /*
+        .NewInstanceFactory().create(CreateEditViewModel::class.java)*/
 
     private val binding: ActivityNoteBinding by lazy {
         ActivityNoteBinding.inflate(layoutInflater)
@@ -30,9 +35,4 @@ class CreateEditActivity : AppCompatActivity() {
 
         setContentView(root)
     }
-
-/*    override fun onPause() {
-        super.onPause()
-        viewModel.onNoteAdded(binding.title.text.toString(), binding.content.text.toString())
-    }*/
 }

@@ -49,16 +49,6 @@ class NotesAdapter(
         private val content = binding.content
 
         init {
-/*            title.setOnClickListener {
-                //var returnVar = false
-                note?.let {
-                    viewModel.onNoteLongClick(it)
-                    //  returnVar = true
-                }
-
-                //returnVar
-            }*/
-
             title.setOnClickListener { listener.onClick(notes[adapterPosition]) }
             title.setOnLongClickListener { listener.onLongClick(notes[adapterPosition]) }
 
@@ -73,6 +63,10 @@ class NotesAdapter(
         }
     }
 
+    /**
+     * ViewModel implements it to
+     * react to user clicks
+     * */
     interface NoteClickListener {
         fun onLongClick(note: Note): Boolean
         fun onClick(note: Note)
