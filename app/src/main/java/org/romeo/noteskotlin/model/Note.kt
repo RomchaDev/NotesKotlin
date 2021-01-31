@@ -12,6 +12,10 @@ import java.io.Serializable
 
 
 data class Note(
-    var title: String,
-    var content: String
-) : Serializable
+    var title: String = "",
+    var content: String = ""
+) : Serializable {
+    override fun hashCode(): Int {
+        return super.hashCode()
+    }
+}
