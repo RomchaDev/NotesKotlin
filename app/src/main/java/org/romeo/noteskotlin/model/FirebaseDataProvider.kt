@@ -2,6 +2,7 @@ package org.romeo.noteskotlin.model
 
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
@@ -21,7 +22,7 @@ class FirebaseDataProvider : FirebaseDataProviderTemplate {
     private val usersCollection = database.collection(USERS_COLLECTION)
     private val notesCollection: CollectionReference by lazy { getCurrentUserNotes() }
 
-    private val currentUser
+    override val currentUser
         get() = FirebaseAuth.getInstance().currentUser
 
     companion object {
@@ -128,5 +129,4 @@ class FirebaseDataProvider : FirebaseDataProviderTemplate {
             usersCollection.document(it.uid)
                 .collection(NOTES_COLLECTION)
         } ?: throw RuntimeException("User cannot be null")
-
 }

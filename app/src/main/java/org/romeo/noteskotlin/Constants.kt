@@ -8,3 +8,4 @@ const val ACTIVITY_TO_START = "ACTIVITY_TO_START"
 const val DEFAULT_NOTE_ID_VALUE = -1L
 const val TITLE_KEY = "title"
 const val CONTENT_KEY = "content"
+const val USER_KEY = "USER_KEY"
