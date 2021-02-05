@@ -4,7 +4,7 @@ import org.romeo.noteskotlin.DEFAULT_NOTE_ID_VALUE
 import java.io.Serializable
 
 data class Note(
-    var id: Long = DEFAULT_NOTE_ID_VALUE,
+    var id: String = DEFAULT_NOTE_ID_VALUE,
     var title: String = "",
     var content: String = ""
 ) : Serializable {
@@ -21,9 +21,7 @@ data class Note(
     }
 
     override fun hashCode(): Int {
-        var result = id.hashCode()
-        result = 31 * result + title.hashCode()
-        result = 31 * result + content.hashCode()
-        return result
+        return id.hashCode()
     }
+
 }

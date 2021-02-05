@@ -2,58 +2,40 @@ package org.romeo.noteskotlin.model
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.google.firebase.auth.FirebaseUser
 
 object Repository {
-    private var nextNoteId = 0L
-    private val dataProvider: FirebaseDataProviderTemplate = FirebaseDataProvider()
-    private val notesListLiveData: MutableLiveData<MutableList<Note>> = MutableLiveData()
-    private val userLiveData: MutableLiveData<FirebaseUser?> = MutableLiveData()
+    private val dataProvider:
+            FirebaseDataProviderTemplate = FirebaseDataProvider()
+
+    private val notesListLiveData:
+            MutableLiveData<ResultNote<MutableList<Note>>?> = MutableLiveData()
 
     var notes: MutableList<Note> = mutableListOf()
         set(value) {
             field = value
-            notesListLiveData.value = notes
+            notesListLiveData.value = ResultNote.Data(notes)
         }
 
     init {
-        notesListLiveData.value = notes
-        dataProvider.subscribeNotesListChanged(this)
-        userLiveData.value = dataProvider.currentUser
+        notesListLiveData.value = ResultNote.Data(notes)
+        takeIf {
+            dataProvider.subscribeNotesListChanges(this) ==
+                    ResultNote.Status.SERVER_ERROR
+        }?.notesListLiveData?.value = ResultNote.Error(NullPointerException())
     }
 
-    fun getNotesListLiveData(): LiveData<MutableList<Note>> {
-        return notesListLiveData
-    }
+    fun getNotesListLiveData():
+            LiveData<ResultNote<MutableList<Note>>?> = notesListLiveData
 
-    fun editNote(noteId: Long?, newNote: Note?): Result {
-        if (newNote == null || noteId == null)
-            return Result.SAVE_ERROR
 
-        for (note in notes) {
-            if (note.id == noteId) {
-                return dataProvider.editNoteById(newNote.id, newNote)
-            }
-        }
+    fun saveNote(note: Note) =
+        dataProvider.saveNote(note)
 
-        return Result.SAVE_ERROR
-    }
 
-    fun saveNote(note: Note): Result {
-        note.id = nextNoteId++
+    fun removeNote(noteId: String) =
+        dataProvider.removeNoteById(noteId)
 
-        return dataProvider.saveNote(note)
-    }
 
-    fun removeNote(noteId: Long): Result {
-        for (note in notes) {
-            if (note.id == noteId) {
-                return dataProvider.removeNoteById(note.id)
-            }
-        }
-
-        return Result.REMOVE_ERROR
-    }
-
-    fun getCurrentUserLiveData() = userLiveData as LiveData<FirebaseUser?>
+    fun getCurrentUserLiveData() =
+        dataProvider.getCurrentUserLiveData()
 }
