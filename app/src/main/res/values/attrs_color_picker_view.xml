@@ -1,0 +1,5 @@
+<resources>
+    <declare-styleable name="ColorPickerView">
+        <attr name="add_default_colors" format="boolean" />
+    </declare-styleable>
+</resources>
