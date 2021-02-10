@@ -11,8 +11,6 @@ import org.romeo.noteskotlin.databinding.ActivityNoteBinding
 import org.romeo.noteskotlin.model.Note
 
 class CreateEditActivity : BaseActivity<Note?, CreateEditViewState>() {
-    private var isPaletteOpened = false
-
     override val viewModel by lazy {
         ViewModelProvider(
             this,
@@ -28,11 +26,6 @@ class CreateEditActivity : BaseActivity<Note?, CreateEditViewState>() {
     }
 
     override fun initViews() {
-        val root = binding.root
-
-        root.layoutParams.width = Constraints.LayoutParams.MATCH_PARENT
-        root.layoutParams.height = Constraints.LayoutParams.MATCH_PARENT
-
         binding.viewModel = viewModel
 
         binding.title.doAfterTextChanged { viewModel.saveCurrentNote() }
@@ -50,12 +43,10 @@ class CreateEditActivity : BaseActivity<Note?, CreateEditViewState>() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.palette -> {
-                if (isPaletteOpened)
+                if (binding.colorPicker.isActive)
                     binding.colorPicker.close()
                 else
                     binding.colorPicker.open()
-
-                isPaletteOpened = !isPaletteOpened
             }
         }
 
@@ -63,9 +54,8 @@ class CreateEditActivity : BaseActivity<Note?, CreateEditViewState>() {
     }
 
     override fun onBackPressed() {
-        if (isPaletteOpened) {
+        if (binding.colorPicker.isActive) {
             binding.colorPicker.close()
-            isPaletteOpened = false
         } else
             super.onBackPressed()
     }

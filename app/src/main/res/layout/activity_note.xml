@@ -21,44 +21,56 @@
         android:layout_margin="8dp"
         app:cardCornerRadius="10dp">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/tool_bar"
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/app_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorPrimary"
             app:layout_constraintTop_toTopOf="parent">
 
-            <EditText
-                android:id="@+id/title"
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/tool_bar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@={viewModel.title}"
-                app:layout_constraintEnd_toEndOf="parent" />
-        </androidx.appcompat.widget.Toolbar>
+                android:background="@color/colorPrimary">
 
-        <HorizontalScrollView
-            android:id="@+id/palette_scroll_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/tool_bar">
+                <EditText
+                    android:id="@+id/title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@={viewModel.title}" />
+            </androidx.appcompat.widget.Toolbar>
 
-            <org.romeo.noteskotlin.views.ColorPickerView
-                android:id="@+id/color_picker"
+            <HorizontalScrollView
                 android:layout_width="wrap_content"
-                android:layout_height="50dp" />
-        </HorizontalScrollView>
+                android:layout_height="wrap_content"
+                android:scrollbars="none">
+
+                <org.romeo.noteskotlin.views.ColorPickerView
+                    android:id="@+id/color_picker"
+                    android:layout_width="wrap_content"
+                    android:layout_height="?attr/actionBarSize"
+                    android:orientation="horizontal"
+                     />
+
+            </HorizontalScrollView>
+
+
+        </com.google.android.material.appbar.AppBarLayout>
 
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
+            app:layout_constraintTop_toBottomOf="@id/app_bar">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/content"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:gravity="top|start"
                 android:hint="@string/enter_your_note_here"
                 android:text="@={viewModel.content}" />
         </com.google.android.material.textfield.TextInputLayout>

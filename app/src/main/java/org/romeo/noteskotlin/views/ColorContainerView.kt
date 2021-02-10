@@ -40,7 +40,7 @@ class ColorContainerView @JvmOverloads constructor(
     private var center: Pair<Float, Float> = Pair(0f, 0f)
 
     @Dimension(unit = PX)
-    private var radiusPX: Float = context.dip(defRadiusDP).toFloat()
+    var radiusPX: Float = context.dip(defRadiusDP).toFloat()
 
     @Dimension(unit = PX)
     private var strokeWidthPX: Float = context.dip(defStrokeWidthDP).toFloat()
@@ -89,12 +89,12 @@ class ColorContainerView @JvmOverloads constructor(
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+
         val height = (radiusPX * 2 + paddingTop + paddingBottom).toInt()
         val width = (radiusPX * 2 + paddingStart + paddingEnd).toInt()
 
         setMeasuredDimension(width, height)
-
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {

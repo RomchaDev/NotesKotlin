@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.annotation.Dimension
 import androidx.annotation.Dimension.DP
+import androidx.annotation.Dimension.PX
 import androidx.core.view.children
 import org.romeo.noteskotlin.R
 import org.romeo.noteskotlin.colors
@@ -19,8 +20,8 @@ private const val PALETTE_ANIMATION_DURATION = 150L
 private const val SCALE = "scale"
 private const val HEIGHT = "height"
 
-private const val ERROR_MESSAGE =
-    "ColorPicker can only contain colors or view groups"
+@Dimension(unit = DP)
+var circlesRadiusDP: Int = 20
 
 @Dimension(unit = DP)
 private val circlesPaddingDP: Int = 8
@@ -48,25 +49,23 @@ class ColorPickerView @JvmOverloads constructor(
         ValueAnimator.AnimatorUpdateListener { animator ->
             layoutParams.apply {
                 height = animator.getAnimatedValue(HEIGHT) as Int
-            }/*.let {
+            }.let {
                 layoutParams = it
-            }*/
+            }
 
             val scale = animator.getAnimatedValue(SCALE) as Float
 
             for (child in children) {
                 child.apply {
-                    scaleX = scale
-                    scaleY = scale
-                    alpha = scale //
+                    scaleX = 1F
+                    scaleY = 1F
+                    alpha = 1F
                 }
             }
         }
     }
 
     init {
-        validateChildren()
-
         val typedArray = context.obtainStyledAttributes(
             attrs, R.styleable.ColorPickerView
         )
@@ -76,12 +75,19 @@ class ColorPickerView @JvmOverloads constructor(
             true
         )
 
+        circlesRadiusDP = typedArray.getDimension(
+            R.styleable.ColorPickerView_circles_radius, circlesRadiusDP.toFloat()
+        ).toInt()
+
         if (addDefaultColors) {
-            colors().forEach { color ->
+            val colors = colors()
+
+            colors.forEach { color ->
                 val circle = ColorContainerView(context)
                     .apply {
                         fillColor = color
                         strokeColor = Color.WHITE
+
                         context.dip(circlesPaddingDP).let {
                             setPadding(it, it, it, it)
                         }
@@ -96,20 +102,15 @@ class ColorPickerView @JvmOverloads constructor(
         typedArray.recycle()
     }
 
-    override fun onViewAdded(child: View?) {
-        super.onViewAdded(child)
-        validateChildren()
-    }
-
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
         layoutParams.apply {
             desiredHeight = height
             height = 0
-        }/*.let {
-                layoutParams = it
-            }*/
+        }.let {
+            layoutParams = it
+        }
     }
 
     fun open() {
@@ -128,17 +129,5 @@ class ColorPickerView @JvmOverloads constructor(
         )
 
         animator.start()
-    }
-
-    private fun validateChildren() {
-        //TODO: Make sure that only view groups and color containers are in children collection
-/*        children.find {
-            it !is ColorContainerView
-            it !is ViewGroup
-        }?.let {
-            throw IllegalArgumentException(
-                ERROR_MESSAGE
-            )
-        }*/
     }
 }
