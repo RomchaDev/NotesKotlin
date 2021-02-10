@@ -1,66 +1,54 @@
 package org.romeo.noteskotlin.model
 
-import android.os.Handler
-import android.os.HandlerThread
-import androidx.annotation.MainThread
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 
 object Repository {
-    private val notes: MutableList<Note> = mutableListOf()
-    private val oneNoteLiveData: MutableLiveData<Note> = MutableLiveData()
+    private var nextNoteId = 0L
+    private val dataProvider: FirebaseDataProviderTemplate = FirebaseDataProvider()
     private val notesListLiveData: MutableLiveData<MutableList<Note>> = MutableLiveData()
-    private val notesHandler: Handler by lazy {
-        val ht = HandlerThread("NOTES_HANDLER_THREAD")
-        ht.start()
-        Handler(ht.looper)
-    }
+
+    var notes: MutableList<Note> = mutableListOf()
+        set(value) {
+            field = value
+            notesListLiveData.value = notes
+        }
 
     init {
- /*       for (i in 1..10) {
-            notes.add(
-                Note(
-                    title = "Hello$i",
-                    content = "World$i !!!"
-                )
-            )
-        }*/
-
         notesListLiveData.value = notes
-    }
-
-    fun insertAdd(note: Note): Result {
-        notes.add(note)
-        oneNoteLiveData.value = note
-        return Result.SUCCESS
-    }
-
-    fun getOneNoteLiveData(): LiveData<Note> {
-        return oneNoteLiveData
+        dataProvider.subscribeNotesListChanged(this)
     }
 
     fun getNotesListLiveData(): LiveData<MutableList<Note>> {
         return notesListLiveData
     }
 
-    fun replaceNote(oldHash: Int, newNote: Note): Result {
-        for (i in 0..notes.size) {
-            if (notes[i].hashCode() == oldHash) {
-                notes[i] = newNote
-                return Result.SUCCESS
+    fun editNote(noteId: Long?, newNote: Note?): Result {
+        if (newNote == null || noteId == null)
+            return Result.SAVE_ERROR
+
+        for (note in notes) {
+            if (note.id == noteId) {
+                return dataProvider.editNoteById(newNote.id, newNote)
             }
         }
 
         return Result.SAVE_ERROR
     }
 
-    fun addNewNote(note: Note): Result {
-        return try {
-            notes.add(note)
-            oneNoteLiveData.value = note
-            Result.SUCCESS
-        } catch (e: Exception) {
-            Result.SAVE_ERROR
+    fun saveNote(note: Note): Result {
+        note.id = nextNoteId++
+
+        return dataProvider.saveNote(note)
+    }
+
+    fun removeNote(noteId: Long): Result {
+        for (note in notes) {
+            if (note.id == noteId) {
+                return dataProvider.removeNoteById(note.id)
+            }
         }
+
+        return Result.REMOVE_ERROR
     }
 }
