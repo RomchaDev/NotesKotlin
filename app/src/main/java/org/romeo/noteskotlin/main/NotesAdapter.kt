@@ -2,21 +2,22 @@ package org.romeo.noteskotlin.main
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.RecyclerView
 import org.romeo.noteskotlin.databinding.NoteItemBinding
 import org.romeo.noteskotlin.model.Note
 
 class NotesAdapter(
-    val viewModel: MainViewModel
+    private val notesLiveData: LiveData<List<Note>>,
+    private val noteClickListener: NotesAdapter.NoteClickListener
 ) :
     RecyclerView.Adapter<NotesAdapter.NoteViewHolder>() {
 
     private var notes = mutableListOf<Note>()
 
     init {
-
-        viewModel.getNotesListLiveData().observeForever {
-            notes = it
+        notesLiveData.observeForever { list ->
+            notes = list as MutableList<Note>
             notifyDataSetChanged()
         }
     }
@@ -38,7 +39,7 @@ class NotesAdapter(
             false
         )
 
-        return NoteViewHolder(binding, viewModel as NoteClickListener)
+        return NoteViewHolder(binding, noteClickListener)
     }
 
     inner class NoteViewHolder(binding: NoteItemBinding, private val listener: NoteClickListener) :

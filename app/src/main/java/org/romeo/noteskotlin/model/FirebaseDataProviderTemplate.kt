@@ -1,8 +1,13 @@
 package org.romeo.noteskotlin.model
 
+import androidx.lifecycle.LiveData
+import com.google.firebase.auth.FirebaseUser
+
 interface FirebaseDataProviderTemplate {
-    fun subscribeNotesListChanged(repository: Repository): Result
-    fun saveNote(note: Note): Result
-    fun removeNoteById(noteId: Long): Result
-    fun editNoteById(noteId: Long, newNote: Note): Result
+    val currentUser: FirebaseUser?
+
+    fun subscribeNotesListChanges(repository: Repository): ResultNote.Status
+    fun saveNote(note: Note): String
+    fun removeNoteById(noteId: String): ResultNote.Status
+    fun getCurrentUserLiveData(): LiveData<FirebaseUser?>
 }
