@@ -21,8 +21,8 @@ class CreateEditActivity : BaseActivity<Note?, CreateEditViewState>() {
         ActivityNoteBinding.inflate(layoutInflater)
     }
 
-    override fun processData(note: Note?) {
-        note?.apply {
+    override fun processData(data: Note?) {
+        data?.apply {
             binding.appBar.setBackgroundColor(color)
             binding.toolBar.setBackgroundColor(color)
         }

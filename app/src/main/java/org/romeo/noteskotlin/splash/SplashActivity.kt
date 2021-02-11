@@ -50,8 +50,8 @@ class SplashActivity : BaseActivity<Boolean, SplashViewState>() {
         private const val SING_IN_REQUEST_CODE = 1
     }
 
-    override fun processData(t: Boolean) {
-        takeIf { !t }?.startAuthActivity()?: startMainActivity()
+    override fun processData(data: Boolean) {
+        takeIf { !data }?.startAuthActivity()?: startMainActivity()
     }
 
     override fun processError(throwable: Throwable) {

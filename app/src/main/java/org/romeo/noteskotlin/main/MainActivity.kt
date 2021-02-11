@@ -38,7 +38,7 @@ class MainActivity : BaseActivity<List<Note>?, MainViewState>() {
         recycler.adapter = adapter
     }
 
-    override fun processData(t: List<Note>?) {
-        t.let { recyclerLiveData.value = it }
+    override fun processData(data: List<Note>?) {
+        data.let { recyclerLiveData.value = it }
     }
 }

@@ -51,7 +51,7 @@ abstract class BaseActivity<T, VS : BaseViewState<T>> : AppCompatActivity() {
      * a toast with default error
      * message by default.
      * */
-    protected open fun processError(error: Throwable) {
+    protected open fun processError(throwable: Throwable) {
         Toast.makeText(
             this,
             getString(R.string.standart_error),
