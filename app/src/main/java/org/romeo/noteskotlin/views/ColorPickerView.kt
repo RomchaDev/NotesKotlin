@@ -57,9 +57,9 @@ class ColorPickerView @JvmOverloads constructor(
 
             for (child in children) {
                 child.apply {
-                    scaleX = 1F
-                    scaleY = 1F
-                    alpha = 1F
+                    scaleX = scale
+                    scaleY = scale
+                    alpha = scale
                 }
             }
         }

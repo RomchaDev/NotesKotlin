@@ -2,7 +2,6 @@ package org.romeo.noteskotlin.create_edit_note
 
 import android.view.Menu
 import android.view.MenuItem
-import androidx.constraintlayout.widget.Constraints
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
 import org.romeo.noteskotlin.R
@@ -22,7 +21,11 @@ class CreateEditActivity : BaseActivity<Note?, CreateEditViewState>() {
         ActivityNoteBinding.inflate(layoutInflater)
     }
 
-    override fun processData(t: Note?) {
+    override fun processData(note: Note?) {
+        note?.apply {
+            binding.appBar.setBackgroundColor(color)
+            binding.toolBar.setBackgroundColor(color)
+        }
     }
 
     override fun initViews() {
@@ -31,6 +34,10 @@ class CreateEditActivity : BaseActivity<Note?, CreateEditViewState>() {
         binding.title.doAfterTextChanged { viewModel.saveCurrentNote() }
 
         binding.content.doAfterTextChanged { viewModel.saveCurrentNote() }
+
+        binding.colorPicker.onColorClickListener = { color ->
+            viewModel.onColorSelected(color)
+        }
 
         setSupportActionBar(binding.toolBar)
     }
@@ -53,6 +60,11 @@ class CreateEditActivity : BaseActivity<Note?, CreateEditViewState>() {
         return super.onOptionsItemSelected(item)
     }
 
+    /**
+     * If color picker is opened, activity
+     * will not be finished after onBackPressed(),
+     * color picker will be closed instead.
+     * */
     override fun onBackPressed() {
         if (binding.colorPicker.isActive) {
             binding.colorPicker.close()

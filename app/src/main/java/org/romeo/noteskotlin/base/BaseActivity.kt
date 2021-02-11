@@ -44,14 +44,14 @@ abstract class BaseActivity<T, VS : BaseViewState<T>> : AppCompatActivity() {
     protected open fun initViews() {
     }
 
-    abstract fun processData(t: T)
+    abstract fun processData(data: T)
 
     /**
      * If error cached, than shows
      * a toast with default error
      * message by default.
      * */
-    protected open fun processError(it: Throwable) {
+    protected open fun processError(error: Throwable) {
         Toast.makeText(
             this,
             getString(R.string.standart_error),

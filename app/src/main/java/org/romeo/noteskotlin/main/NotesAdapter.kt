@@ -42,7 +42,7 @@ class NotesAdapter(
         return NoteViewHolder(binding, noteClickListener)
     }
 
-    inner class NoteViewHolder(binding: NoteItemBinding, private val listener: NoteClickListener) :
+    inner class NoteViewHolder(private val binding: NoteItemBinding, private val listener: NoteClickListener) :
         RecyclerView.ViewHolder(binding.root) {
 
         private var note: Note? = null
@@ -59,8 +59,12 @@ class NotesAdapter(
 
         fun bind(note: Note) {
             this.note = note
+
             title.text.replace(0, title.length(), note.title)
             content.text?.replace(0, content.length(), note.content)
+
+            binding.root.setCardBackgroundColor(note.color)
+            binding.mainLinear.setBackgroundColor(note.color)
         }
     }
 

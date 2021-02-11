@@ -38,7 +38,7 @@
                     android:id="@+id/title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@={viewModel.title}" />
+                    android:text="@={viewModel.note.title}" />
             </androidx.appcompat.widget.Toolbar>
 
             <HorizontalScrollView
@@ -72,7 +72,7 @@
                 android:layout_height="match_parent"
                 android:gravity="top|start"
                 android:hint="@string/enter_your_note_here"
-                android:text="@={viewModel.content}" />
+                android:text="@={viewModel.note.content}" />
         </com.google.android.material.textfield.TextInputLayout>
 
 
