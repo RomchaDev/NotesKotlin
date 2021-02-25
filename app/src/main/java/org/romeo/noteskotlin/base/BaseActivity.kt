@@ -4,11 +4,8 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewbinding.ViewBinding
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.launch
 import org.romeo.noteskotlin.R
 
 abstract class BaseActivity<T> : AppCompatActivity() {
@@ -22,11 +19,6 @@ abstract class BaseActivity<T> : AppCompatActivity() {
         setContentView(binding.root)
 
         initViews()
-
-/*        viewModel.getViewStateLiveData().observe(this) { viewState ->
-            viewState.data?.let { processData(it) }
-                ?: viewState.error?.let { processError(it) }
-        }*/
 
         scope.launch {
             viewModel.viewStateChannel.consumeEach { processData(it) }
@@ -56,5 +48,10 @@ abstract class BaseActivity<T> : AppCompatActivity() {
             getString(R.string.standart_error),
             Toast.LENGTH_LONG
         ).show()
+    }
+
+    override fun onDestroy() {
+        scope.cancel()
+        super.onDestroy()
     }
 }

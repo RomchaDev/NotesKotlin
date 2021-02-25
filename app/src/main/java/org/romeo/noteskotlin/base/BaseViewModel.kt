@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.Channel
 import org.romeo.noteskotlin.model.Repository
@@ -14,4 +15,11 @@ abstract class BaseViewModel<T>(val repository: Repository) : ViewModel() {
     val errorChannel: Channel<Throwable> = Channel(Channel.CONFLATED)
 
     protected val scope = CoroutineScope(Job() + Dispatchers.IO)
+
+    override fun onCleared() {
+        viewStateChannel.cancel()
+        errorChannel.cancel()
+        scope.cancel()
+        super.onCleared()
+    }
 }

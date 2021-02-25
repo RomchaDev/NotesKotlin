@@ -60,7 +60,6 @@ class FirebaseDataProvider(database: FirebaseFirestore, private val firebaseAuth
                             notes.add(doc.toObject(Note::class.java))
                         }
 
-                        //repository.notes = notes
                         scope.launch {
                             repository.notes = notes
                         }
