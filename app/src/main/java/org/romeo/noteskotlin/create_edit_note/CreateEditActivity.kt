@@ -3,19 +3,17 @@ package org.romeo.noteskotlin.create_edit_note
 import android.view.Menu
 import android.view.MenuItem
 import androidx.core.widget.doAfterTextChanged
-import androidx.lifecycle.ViewModelProvider
+import org.koin.android.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
+
 import org.romeo.noteskotlin.R
 import org.romeo.noteskotlin.base.BaseActivity
 import org.romeo.noteskotlin.databinding.ActivityNoteBinding
 import org.romeo.noteskotlin.model.Note
 
-class CreateEditActivity : BaseActivity<Note?, CreateEditViewState>() {
-    override val viewModel by lazy {
-        ViewModelProvider(
-            this,
-            CreateEditViewModelFactory(intent)
-        ).get(CreateEditViewModel::class.java)
-    }
+class CreateEditActivity : BaseActivity<Note?>() {
+
+    override val viewModel: CreateEditViewModel by viewModel { parametersOf(intent) }
 
     override val binding: ActivityNoteBinding by lazy {
         ActivityNoteBinding.inflate(layoutInflater)

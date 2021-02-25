@@ -6,8 +6,8 @@ import com.google.firebase.auth.FirebaseUser
 interface FirebaseDataProviderTemplate {
     val currentUser: FirebaseUser?
 
-    fun subscribeNotesListChanges(repository: Repository): ResultNote.Status
-    fun saveNote(note: Note): String
-    fun removeNoteById(noteId: String): ResultNote.Status
-    fun getCurrentUserLiveData(): LiveData<FirebaseUser?>
+    suspend fun subscribeToNotesListChanges(repository: Repository)
+    suspend fun saveNote(note: Note): String
+    suspend fun removeNoteById(noteId: String): Boolean
+    suspend fun getCurrentUser(): FirebaseUser?
 }

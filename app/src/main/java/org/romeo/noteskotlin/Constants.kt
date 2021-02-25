@@ -7,6 +7,7 @@ import androidx.annotation.ColorInt
 const val NOTE_KEY = "NOTE_KEY"
 const val ACTIVITY_TO_START = "ACTIVITY_TO_START"
 const val DEFAULT_NOTE_ID_VALUE = "-1"
+const val START_INTENT = "START_INTENT"
 
 @ColorInt
 const val DEFAULT_NOTE_COLOR = Color.LTGRAY

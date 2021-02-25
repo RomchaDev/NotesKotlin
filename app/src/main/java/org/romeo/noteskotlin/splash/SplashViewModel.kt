@@ -2,18 +2,19 @@ package org.romeo.noteskotlin.splash
 
 import android.accounts.AuthenticatorException
 import androidx.lifecycle.LifecycleObserver
+import kotlinx.coroutines.runBlocking
 import org.romeo.noteskotlin.base.BaseViewModel
 import org.romeo.noteskotlin.model.Repository
 
-class SplashViewModel : BaseViewModel<Boolean, SplashViewState>(), LifecycleObserver {
+class SplashViewModel(repository: Repository) :
+    BaseViewModel<Boolean>(repository), LifecycleObserver {
 
     init {
-        Repository.getCurrentUserLiveData().observeForever { user ->
-            user?.let {
-                viewStateLiveData.value = SplashViewState(true, null)
+        runBlocking {
+            repository.getCurrentUser()?.let {
+                viewStateChannel.send(true)
             } ?: run {
-                viewStateLiveData.value =
-                    SplashViewState(false, AuthenticatorException())
+                errorChannel.send(AuthenticatorException())
             }
         }
     }

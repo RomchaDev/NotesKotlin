@@ -1,28 +1,17 @@
 package org.romeo.noteskotlin.base
 
-import android.content.Intent
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.BroadcastChannel
+import kotlinx.coroutines.channels.Channel
+import org.romeo.noteskotlin.model.Repository
 
-abstract class BaseViewModel<T, VS : BaseViewState<T>> : ViewModel() {
-    protected val viewStateLiveData:
-            MutableLiveData<VS> = MutableLiveData()
+abstract class BaseViewModel<T>(val repository: Repository) : ViewModel() {
 
-    /**
-     * Should contain intent with extra
-     * data with key "EXTRA_DATA_KEY" and
-     * activity class to start with key
-     * "ACTIVITY_TO_START"
-     * */
-    // Это явно не есть хорошо, но не совсем понимаю, как по-другому
-    // передать контроль над запуском activity в ViewModel.
-    protected val startActivityLiveData:
-            MutableLiveData<Intent> = MutableLiveData()
+    val viewStateChannel: BroadcastChannel<T> = BroadcastChannel(Channel.CONFLATED)
+    val errorChannel: Channel<Throwable> = Channel(Channel.CONFLATED)
 
-    fun getViewStateLiveData() =
-        viewStateLiveData as LiveData<VS>
-
-    fun getStartActivityLiveData() =
-        startActivityLiveData as LiveData<Intent>
+    protected val scope = CoroutineScope(Job() + Dispatchers.IO)
 }

@@ -1,17 +1,21 @@
 package org.romeo.noteskotlin.base
 
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewbinding.ViewBinding
-import org.romeo.noteskotlin.ACTIVITY_TO_START
-import org.romeo.noteskotlin.NOTE_KEY
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.launch
 import org.romeo.noteskotlin.R
 
-abstract class BaseActivity<T, VS : BaseViewState<T>> : AppCompatActivity() {
+abstract class BaseActivity<T> : AppCompatActivity() {
     abstract val binding: ViewBinding
-    abstract val viewModel: BaseViewModel<T, VS>
+    abstract val viewModel: BaseViewModel<T>
+
+    private val scope = CoroutineScope(Dispatchers.Main + Job())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,21 +23,16 @@ abstract class BaseActivity<T, VS : BaseViewState<T>> : AppCompatActivity() {
 
         initViews()
 
-        viewModel.getStartActivityLiveData().observe(this) { inIntent ->
-            val classJava = inIntent.getSerializableExtra(ACTIVITY_TO_START) as Class<*>
-
-            val startIntent = Intent(this, classJava)
-
-            startIntent.putExtra(NOTE_KEY, inIntent.getSerializableExtra(NOTE_KEY))
-
-            startActivity(startIntent)
-
-        }
-
-        viewModel.getViewStateLiveData().observe(this) { viewState ->
+/*        viewModel.getViewStateLiveData().observe(this) { viewState ->
             viewState.data?.let { processData(it) }
                 ?: viewState.error?.let { processError(it) }
+        }*/
+
+        scope.launch {
+            viewModel.viewStateChannel.consumeEach { processData(it) }
+            viewModel.errorChannel.consumeEach { processError(it) }
         }
+
     }
 
     /**

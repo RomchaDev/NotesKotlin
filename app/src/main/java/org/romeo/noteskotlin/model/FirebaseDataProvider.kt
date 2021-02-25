@@ -9,7 +9,16 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.QuerySnapshot
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.BroadcastChannel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.consume
+import kotlinx.coroutines.flow.asFlow
 import org.romeo.noteskotlin.DEFAULT_NOTE_ID_VALUE
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 private const val NOTES_COLLECTION = "NOTES_COLLECTION"
 private const val USERS_COLLECTION = "USERS_COLLECTION"
@@ -18,24 +27,26 @@ private const val USERS_COLLECTION = "USERS_COLLECTION"
 /**
  * Class to work with data from firestore database
  * */
-class FirebaseDataProvider : FirebaseDataProviderTemplate {
-    private val database: FirebaseFirestore = FirebaseFirestore.getInstance()
+class FirebaseDataProvider(database: FirebaseFirestore, private val firebaseAuth: FirebaseAuth) :
+    FirebaseDataProviderTemplate {
+
     private val usersCollection = database.collection(USERS_COLLECTION)
 
-    override val currentUser
-        get() = FirebaseAuth.getInstance().currentUser
+    private val scope = CoroutineScope(Dispatchers.IO + Job())
 
-    companion object {
-        const val TAG = "FIREBASE_DATA_PROVIDER"
-    }
+    private val notesChannel: BroadcastChannel<List<Note>> =
+        BroadcastChannel(Channel.CONFLATED)
+
+    override val currentUser
+        get() = firebaseAuth.currentUser
 
     /**
      * When new note is edited, this method
      * resets Repository's notes list
      * */
-    override fun subscribeNotesListChanges(repository: Repository): ResultNote.Status {
-        var result = ResultNote.Status.SAVE_ERROR
-        try {
+    @Throws(FirebaseFirestoreException::class)
+    override suspend fun subscribeToNotesListChanges(repository: Repository) {
+        scope.launch {
             getCurrentUserNotes()
                 .addSnapshotListener { querySnapshot: QuerySnapshot?,
                                        firebaseFirestoreException: FirebaseFirestoreException? ->
@@ -49,70 +60,68 @@ class FirebaseDataProvider : FirebaseDataProviderTemplate {
                             notes.add(doc.toObject(Note::class.java))
                         }
 
-                        repository.notes = notes
-                        result = ResultNote.Status.SUCCESS
+                        //repository.notes = notes
+                        scope.launch {
+                            repository.notes = notes
+                        }
+
+                        runBlocking {
+                            notesChannel.send(notes)
+                        }
                     }
                 }
-
-            return result
-        } catch (e: RuntimeException) {
-            return ResultNote.Status.SERVER_ERROR
         }
     }
 
-    override fun saveNote(note: Note): String {
-        return try {
-            val id = if (note.id == DEFAULT_NOTE_ID_VALUE)
-                getCurrentUserNotes().document().id
-            else note.id
 
-            getCurrentUserNotes()
-                .document(id)
-                .set(note)
-                .addOnSuccessListener {
-                    Log.d(TAG, "addNewNote: success: ${note.id}")
-                }.addOnFailureListener {
-                    Log.d(TAG, "addNewNote: failure: ${note.id}")
-                    it.printStackTrace()
-                }
-            id
-        } catch (e: RuntimeException) {
-            DEFAULT_NOTE_ID_VALUE
+    override suspend fun saveNote(note: Note): String =
+        suspendCoroutine { continuation ->
+            try {
+                val id = if (note.id == DEFAULT_NOTE_ID_VALUE)
+                    getCurrentUserNotes().document().id
+                else note.id
+
+                note.id = id
+
+                getCurrentUserNotes()
+                    .document(id)
+                    .set(note)
+                    .addOnSuccessListener {
+                        Log.d(TAG, "addNewNote: success: ${note.id}")
+                        continuation.resume(id)
+                    }.addOnFailureListener { exception ->
+                        Log.d(TAG, "addNewNote: failure: ${note.id}")
+                        exception.printStackTrace()
+                        continuation.resumeWithException(exception)
+                    }
+            } catch (e: RuntimeException) {
+                DEFAULT_NOTE_ID_VALUE
+            }
         }
 
-    }
-
-
-    override fun removeNoteById(noteId: String): ResultNote.Status {
-        var result = ResultNote.Status.REMOVE_ERROR
-
-        try {
+    override suspend fun removeNoteById(noteId: String): Boolean =
+        suspendCoroutine { continuation ->
             getCurrentUserNotes()
                 .document(noteId)
                 .delete()
                 .addOnSuccessListener {
-                    result = ResultNote.Status.SUCCESS
+                    continuation.resume(true)
                     Log.d(TAG, "removeNoteById: success: $noteId")
-                }.addOnFailureListener {
+                }.addOnFailureListener { exception ->
                     Log.d(TAG, "removeNoteById: failure: $noteId")
-                    it.printStackTrace()
+                    exception.printStackTrace()
+                    continuation.resumeWithException(exception)
                 }
-
-            return result
-        } catch (e: RuntimeException) {
-            return ResultNote.Status.REMOVE_ERROR
         }
 
-    }
 
-    override fun getCurrentUserLiveData(): LiveData<FirebaseUser?> {
-        val result = MutableLiveData<FirebaseUser?>()
+    override suspend fun getCurrentUser(): FirebaseUser? =
+        suspendCoroutine { continuation ->
+            currentUser?.let { user ->
+                continuation.resume(user)
+            } ?: continuation.resume(null)
+        }
 
-        currentUser?.let {
-            result.value = it
-            return@getCurrentUserLiveData result
-        } ?: return result
-    }
 
     /**
      * Returns notes collection belonging
@@ -123,4 +132,8 @@ class FirebaseDataProvider : FirebaseDataProviderTemplate {
             usersCollection.document(it.uid)
                 .collection(NOTES_COLLECTION)
         } ?: throw RuntimeException("User cannot be null")
+
+    companion object {
+        const val TAG = "FIREBASE_DATA_PROVIDER"
+    }
 }

@@ -1,41 +1,46 @@
 package org.romeo.noteskotlin.model
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import com.google.firebase.firestore.FirebaseFirestoreException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.BroadcastChannel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
 
-object Repository {
-    private val dataProvider:
-            FirebaseDataProviderTemplate = FirebaseDataProvider()
+class Repository(private val dataProvider: FirebaseDataProvider) {
 
-    private val notesListLiveData:
-            MutableLiveData<ResultNote<MutableList<Note>>?> = MutableLiveData()
+    private val scope = CoroutineScope(Dispatchers.Default)
+
+    val notesChannel: BroadcastChannel<List<Note>> =
+        BroadcastChannel(Channel.CONFLATED)
 
     var notes: MutableList<Note> = mutableListOf()
         set(value) {
             field = value
-            notesListLiveData.value = ResultNote.Data(notes)
+            scope.launch { notesChannel.send(value) }
         }
 
     init {
-        notesListLiveData.value = ResultNote.Data(notes)
-        takeIf {
-            dataProvider.subscribeNotesListChanges(this) ==
-                    ResultNote.Status.SERVER_ERROR
-        }?.notesListLiveData?.value = ResultNote.Error(NullPointerException())
+        scope.launch {
+            try {
+                dataProvider.subscribeToNotesListChanges(this@Repository)
+            } catch (e: FirebaseFirestoreException) {
+                dataProvider.subscribeToNotesListChanges(this@Repository)
+            }
+        }
     }
 
-    fun getNotesListLiveData():
-            LiveData<ResultNote<MutableList<Note>>?> = notesListLiveData
 
-
-    fun saveNote(note: Note) =
+    suspend fun saveNote(note: Note) =
         dataProvider.saveNote(note)
 
 
-    fun removeNote(noteId: String) =
+    suspend fun removeNote(noteId: String) =
         dataProvider.removeNoteById(noteId)
 
 
-    fun getCurrentUserLiveData() =
-        dataProvider.getCurrentUserLiveData()
+    suspend fun getCurrentUser() =
+        dataProvider.getCurrentUser()
+
+    //fun getNotesChannel() = dataProvider.notesChannel
 }
