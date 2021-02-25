@@ -2,4 +2,7 @@
     <string name="app_name">NotesKotlin</string>
     <string name="enter_your_note_here">Enter your note here</string>
     <string name="standart_error">Sorry, something went wrong</string>
+    <string name="palette">palette</string>
+    <string name="delete">Delete</string>
+    <string name="Edit">edit</string>
 </resources>

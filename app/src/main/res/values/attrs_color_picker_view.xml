@@ -1,0 +1,6 @@
+<resources>
+    <declare-styleable name="ColorPickerView">
+        <attr name="add_default_colors" format="boolean" />
+        <attr name="circles_radius" format="dimension" />
+    </declare-styleable>
+</resources>

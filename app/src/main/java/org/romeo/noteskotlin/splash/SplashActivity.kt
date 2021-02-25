@@ -2,17 +2,14 @@ package org.romeo.noteskotlin.splash
 
 import android.accounts.AuthenticatorException
 import android.content.Intent
-import androidx.lifecycle.ViewModelProvider
 import com.firebase.ui.auth.AuthUI
+import org.koin.android.viewmodel.ext.android.viewModel
 import org.romeo.noteskotlin.base.BaseActivity
 import org.romeo.noteskotlin.databinding.ActivitySplashBinding
 import org.romeo.noteskotlin.main.MainActivity
 
-class SplashActivity : BaseActivity<Boolean, SplashViewState>() {
-    override val viewModel by lazy {
-        ViewModelProvider.NewInstanceFactory()
-            .create(SplashViewModel::class.java)
-    }
+class SplashActivity : BaseActivity<Boolean>() {
+    override val viewModel: SplashViewModel by viewModel()
 
     override val binding by lazy {
         ActivitySplashBinding.inflate(layoutInflater)
@@ -50,8 +47,8 @@ class SplashActivity : BaseActivity<Boolean, SplashViewState>() {
         private const val SING_IN_REQUEST_CODE = 1
     }
 
-    override fun processData(t: Boolean) {
-        takeIf { !t }?.startAuthActivity()?: startMainActivity()
+    override fun processData(data: Boolean) {
+        takeIf { !data }?.startAuthActivity()?: startMainActivity()
     }
 
     override fun processError(throwable: Throwable) {

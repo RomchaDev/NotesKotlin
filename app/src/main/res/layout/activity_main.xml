@@ -5,8 +5,8 @@
 
     <data>
         <variable
-            name="viewModel"
-            type="org.romeo.noteskotlin.main.MainViewModel" />
+            name="activity"
+            type="org.romeo.noteskotlin.main.MainActivity" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -26,7 +26,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            android:onClick="@{() -> viewModel.onCreateNotePressed()}"
+            android:onClick="@{() -> activity.onCreateNotePressed()}"
             android:layout_marginEnd="12dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
